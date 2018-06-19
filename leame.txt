@@ -1,0 +1,6 @@
+Calculadora para compras
+---------------------------
+caracteristicas: 
+* adaptable a moviles.
+* desarrollada en JS.
+* libre uso. 
