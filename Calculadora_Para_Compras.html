@@ -22,25 +22,48 @@
 		cajaprecio[0].innerHTML +="<input type='text' placeholder='Precio' >";
 		cajaresultado[0].innerHTML +="<input type='text' placeholder='resultado' >";
 	}*/
-	var indi =1;
-	$(document).ready(function(){
+        var indi =1;
+        var IniNom;
+        var IniCant;
+        var IniPrec;
+        var IniRes;
+        $(document).ready(function(){
+            IniNom = $(".cajasnompro").html();
+            IniCant = $(".cajascantidad").html();
+            IniPrec = $(".cajaprecio").html();
+            IniRes = $(".cajaresultado").html();
     $("#Add").click(function(){
-		indi = indi+1;
+                indi = indi+1;
         $(".cajasnompro").append(" <input type='text' placeholder='Nombre del producto'>");
-		$(".cajascantidad").append(" <input type='number'  class='cant' placeholder='Cant' onkeyup='Resultado("+indi+")'>");
-		$(".cajaprecio").append(" <input type='number'  class='precio' placeholder='Prec' onkeyup='Resultado("+indi+")' >");
-		$(".cajaresultado").append(" <input type='number'  class='resultado'>");
+                $(".cajascantidad").append(" <input type='number'  class='cant' placeholder='Cant' onkeyup='Resultado("+indi+")'>");
+                $(".cajaprecio").append(" <input type='number'  class='precio' placeholder='Prec' onkeyup='Resultado("+indi+")' >");
+                $(".cajaresultado").append(" <input type='number'  class='resultado'>");
     });
+    loadData();
 });
-	 function Resultado(posi){
-		 var precio = document.getElementsByClassName('precio');
-		 var cantidad = document.getElementsByClassName('cant');
-		  var resultado = document.getElementsByClassName('resultado');
-		   cost =  precio[posi].value * cantidad[posi].value;
-		 resultado[posi].value=cost;
-	 }
+         function Resultado(posi){
+                 var precio = document.getElementsByClassName('precio');
+                 var cantidad = document.getElementsByClassName('cant');
+                  var resultado = document.getElementsByClassName('resultado');
+                 var p = parseFloat(precio[posi].value) || 0;
+                 var c = parseFloat(cantidad[posi].value) || 0;
+                 if(c <= 0){
+                     cantidad[posi].style.borderColor = 'red';
+                 }else{
+                     cantidad[posi].style.borderColor = '';
+                 }
+                 if(p < 0){
+                     precio[posi].style.borderColor = 'red';
+                 }else{
+                     precio[posi].style.borderColor = '';
+                 }
+                 var cost =  p * c;
+                 resultado[posi].value= cost ? cost.toFixed(2) : '';
+                 CalcularTotal();
+                 saveData();
+         }
 	
-	function CalcularTotal(){
+function CalcularTotal(){
 var Precios=document.getElementsByClassName('resultado');
 var CantidadDePrecios =Precios.length;
 var suma =0;
@@ -56,6 +79,42 @@ var suma =0;
  }
  resultado="S/"+suma.toFixed(5);
  document.getElementById('resultado').innerHTML=resultado;
+ saveData();
+}
+
+function LimpiarCampos(){
+    $(".cajasnompro").html(IniNom);
+    $(".cajascantidad").html(IniCant);
+    $(".cajaprecio").html(IniPrec);
+    $(".cajaresultado").html(IniRes);
+    indi = 1;
+    document.getElementById('resultado').innerHTML = '0.00';
+    localStorage.clear();
+}
+
+function saveData(){
+    var nombres = $(".cajasnompro input").map(function(){return this.value;}).get();
+    var cantidades = $(".cajascantidad input").map(function(){return this.value;}).get();
+    var precios = $(".cajaprecio input").map(function(){return this.value;}).get();
+    localStorage.setItem('nombres', JSON.stringify(nombres));
+    localStorage.setItem('cantidades', JSON.stringify(cantidades));
+    localStorage.setItem('precios', JSON.stringify(precios));
+    localStorage.setItem('total', document.getElementById('resultado').innerHTML);
+}
+
+function loadData(){
+    var nombres = JSON.parse(localStorage.getItem('nombres') || '[]');
+    var cantidades = JSON.parse(localStorage.getItem('cantidades') || '[]');
+    var precios = JSON.parse(localStorage.getItem('precios') || '[]');
+    var max = Math.max(nombres.length, cantidades.length, precios.length);
+    for(var i=2; i<max; i++){
+        $("#Add").click();
+    }
+    $(".cajasnompro input").each(function(i){ if(nombres[i]) this.value = nombres[i]; });
+    $(".cajascantidad input").each(function(i){ if(cantidades[i]) { this.value = cantidades[i]; Resultado(i); } });
+    $(".cajaprecio input").each(function(i){ if(precios[i]) { this.value = precios[i]; Resultado(i); } });
+    var tot = localStorage.getItem('total');
+    if(tot){ document.getElementById('resultado').innerHTML = tot; }
 }
 
 function CambiaFondo(TheBtn){
@@ -103,9 +162,10 @@ function ReiniciaFondo(TheBtn){
       <input type="number" class="resultado"  >
     </div>
 	  </div>
-    <div class="controles">
+ <div class="controles">
  <input type="button" value="CALCULAR" onclick="CalcularTotal()" class="BtnCont" onmousedown="CambiaFondo('0')" onmouseup="ReiniciaFondo('0')">
  <input type="button" value="ABREGAR MAS PRODUCTOS" id="Add" class="BtnCont" onmousedown="CambiaFondo('1')" onmouseup="ReiniciaFondo('1')">
+ <input type="button" value="LIMPIAR" onclick="LimpiarCampos()" class="BtnCont" onmousedown="CambiaFondo('2')" onmouseup="ReiniciaFondo('2')">
  <label>Total :</label><label  id="resultado">0.00</label>
  </div>
   </form>

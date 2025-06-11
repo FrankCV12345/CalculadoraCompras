@@ -3,4 +3,7 @@ Calculadora para compras
 caracteristicas: 
 * adaptable a moviles.
 * desarrollada en JS.
-* libre uso. 
+* libre uso.
+* total dinamico al ingresar datos.
+* boton para limpiar la lista.
+* guarda los datos en localStorage.
